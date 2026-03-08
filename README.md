@@ -19,7 +19,7 @@ skeleton‑based procedural animation concepts**.
 
 ## Demo
 
-The repository includes a short demonstration(fish_ai.mp4) showing:
+The repository includes a short demonstration showing:
 
 -   Procedural swimming animation
 -   Autonomous navigation
@@ -27,11 +27,13 @@ The repository includes a short demonstration(fish_ai.mp4) showing:
 -   Predator fleeing behavior
 -   Target seeking behavior
 
-The plant is designated as the predator :
+The plant object in the scene is used as the predator for demonstration purposes. :
 ![Predator_AI Demo](Predator_escape.gif)
 
 The UI panel usage : 
 ![UI_Panal_uasage](States.gif)
+
+Full video: fish_ai.mp4
 
 ------------------------------------------------------------------------
 
@@ -49,9 +51,9 @@ The UI panel usage :
 3.  Switch to the **Scripting** workspace.
 4.  Select the included Python script.
 5.  Click **Run Script**.
-6.  Press **Play** on the timeline.(It is recommended to play this in the Layout workspace & in the Material preview viewport due to general computational constraints in the remder tab)
+6.  Press **Play** on the timeline.(It is recommended to play this in the Layout workspace & in the Material preview viewport due to general computational constraints in the render tab)
 
-Select the armature(spine of the fish) & then a **Fish AI panel** will appear in the 3D viewport sidebar.
+Select the fish armature (the spine skeleton of the fish) & then a **Fish AI panel** will appear in the 3D viewport sidebar.
 Press **N** to open the sidebar and access the controller.
 
 ------------------------------------------------------------------------
