@@ -27,10 +27,12 @@ The repository includes a short demonstration showing:
 -   Predator fleeing behavior
 -   Target seeking behavior
 
-The plant object in the scene is used as the predator for demonstration purposes. :
+The plant object in the scene is used as the predator for demonstration purposes :
+
 ![Predator_AI Demo](Predator_escape.gif)
 
 The UI panel usage : 
+
 ![UI_Panal_uasage](States.gif)
 
 Full video: fish_ai.mp4
