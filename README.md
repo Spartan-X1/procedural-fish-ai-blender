@@ -1,61 +1,52 @@
 # Procedural Fish AI Simulation in Blender
 
-This project demonstrates an autonomous fish AI system built in Blender
-using Python. The system simulates natural fish movement using
-procedural animation, steering behaviors, and environmental awareness.
+This project demonstrates a **procedural skeletal animation system**
+implemented in Blender using Python.\
+The goal of the project is to showcase how skeletal motion, simple
+behavioral logic, and environmental sensing can be combined to generate
+autonomous movement for a marine creature.
 
-The fish can navigate terrain, avoid obstacles, react to predators, and
-follow targets while maintaining realistic swimming motion.
+The fish moves autonomously within a scene while maintaining natural
+swimming motion through procedural bone animation.\
+The system integrates **behavior states, obstacle detection, terrain
+awareness, and target interaction** to simulate believable underwater
+navigation.
 
-------------------------------------------------------------------------
-
-## Features
-
--   Autonomous fish movement using a velocity-based steering system
--   Terrain awareness using raycasting
--   Obstacle avoidance using a forward radar system
--   Target seeking behavior
--   Predator avoidance behavior
--   Procedural skeletal swimming animation
--   Multi-state behavior system
-
-Behavior states: - IDLING - SWIMMING - FLEEING - TURNING
+This project was created as part of an **entry task focused on
+skeleton‑based procedural animation concepts**.
 
 ------------------------------------------------------------------------
 
 ## Demo
 
-A demonstration video is included in this repository showing:
+The repository includes a short demonstration showing:
 
--   autonomous navigation
--   terrain avoidance
--   predator fleeing
--   target following
--   procedural swimming animation
+-   Procedural swimming animation
+-   Autonomous navigation
+-   Terrain avoidance
+-   Predator fleeing behavior
+-   Target seeking behavior
 
 ------------------------------------------------------------------------
 
 ## Requirements
 
-Blender 5 or newer.
-
-No additional dependencies are required.
+-   Blender **5 or newer**
+-   No external dependencies
 
 ------------------------------------------------------------------------
 
-## How to Run
+## Running the Simulation
 
-1.  Download the repository.
-2.  Open `Cinematic_demo.blend` in Blender.
+1.  Download or clone this repository.
+2.  Open `Cinematic_demo.blend` in **Blender**.
 3.  Switch to the **Scripting** workspace.
-4.  Select the script in the text editor.
+4.  Select the included Python script.
 5.  Click **Run Script**.
-6.  Press **Play** on the timeline to start the simulation.
+6.  Press **Play** on the timeline.(It is recommended to play this in the Layout workspace & in the Material preview viewport due to general computational constraints in the remder tab)
 
-After running the script,select the armature(spine of the fish) a panel called **Fish AI** will appear in the
-3D Viewport sidebar.
-
-Press **N** to open the sidebar.
+Select the armature(spine of the fish) & then a **Fish AI panel** will appear in the 3D viewport sidebar.
+Press **N** to open the sidebar and access the controller.
 
 ------------------------------------------------------------------------
 
@@ -63,45 +54,194 @@ Press **N** to open the sidebar.
 
 The Fish AI panel allows you to:
 
--   Change the fish behavior state
--   Assign a target object (When target selected the panel is locked and nothing can be changed apart from removing the target)
--   Assign a predator object (When predator object is selected the panel is locked and nothing can be changed until far away from the predator)
+-   Select the fish **behavior state**
+-   Assign a **target object**
+-   Assign a **predator object**
 
-Predator detection radius is approximately 50 meters.
+When a predator enters a radius of approximately **50 units**, the fish
+transitions into a fleeing state.
 
 ------------------------------------------------------------------------
 
-## Core Techniques Used
+# Core Techniques Used
 
-### Context Steering
+## Frame-Based Procedural Animation
 
-The fish evaluates multiple possible movement directions and selects the
-safest path based on: - target direction - obstacle proximity - terrain
-collision risk
+The animation system is driven using Blender's frame update handler:
 
-### Raycasting
+    bpy.app.handlers.frame_change_pre.append(procedural_anim_handler)
 
-Raycasts are used to detect: - terrain height - obstacles in front of
-the fish
+This handler executes once per frame and updates:
 
-### Procedural Animation
+-   fish behavior state
+-   navigation direction
+-   velocity
+-   skeletal pose
 
-The swimming motion is generated dynamically by applying sinusoidal
-rotations to the fish bones.
+The animation is therefore generated **procedurally in real time**
+rather than using keyframed animation.
 
-### Multi-State Behavior System
+------------------------------------------------------------------------
 
-Fish behavior is controlled using a state machine with different
-behavioral modes.
+## Finite State Machine (Behavior Control)
+
+The fish behavior is controlled using a simple **finite state machine
+(FSM)** with four states:
+
+-   **IDLING** -- minimal motion
+-   **SWIMMING** -- normal exploration & locomotion behavior
+-   **FLEEING** -- escape behavior 
+-   **TURNING** -- rotation to change direction 
+
+Each state uses a unique set of parameters defined in `STATE_PARAMS`
+which control:
+
+-   swimming amplitude
+-   wave propagation speed
+-   body wave length
+-   forward velocity
+-   turning speed
+
+This allows each behavior state to exhibit different locomotion
+characteristics.
+
+------------------------------------------------------------------------
+
+## Context-Based Steering
+
+Movement direction is determined using a context steering approach.
+
+The fish first computes an **ideal direction** based on behavioral
+priorities:
+
+1.  Escape from predator
+2.  Move toward target
+3.  Wander randomly
+
+Example direction calculation:
+
+    ideal_dir = (target - obj.location).normalized()
+
+This vector becomes the desired heading for navigation.
+
+------------------------------------------------------------------------
+
+## Multi-Ray Obstacle Detection
+
+To detect obstacles, the system casts multiple rays around the fish's
+forward direction.
+
+The rays sample two orthogonal planes:
+
+-   forward/right plane
+-   forward/up plane
+
+Directional sampling:
+
+    for i in range(16):
+        angle = (i / 16.0) * 2π
+
+Each candidate direction is evaluated using Blender's ray casting API:
+
+    scene.ray_cast(depsgraph, origin, direction)
+
+This allows the fish to detect terrain or obstacles before collision.
+
+------------------------------------------------------------------------
+
+## Direction Scoring and Selection
+
+Each sampled direction receives a score based on:
+
+**Alignment with desired direction**
+
+    score = dot(test_dir, ideal_dir)
+
+**Collision risk penalty**
+
+    penalty = (1 - hit_distance / max_distance)
+
+The direction with the highest score becomes the new steering direction.
+
+This produces smooth avoidance behavior without abrupt direction
+changes.
+
+------------------------------------------------------------------------
+
+## Terrain Height Control
+
+To prevent the fish from intersecting terrain, a **three-point terrain
+probe** is used.
+
+Downward raycasts are performed from:
+
+-   head
+-   body center
+-   tail
+
+Example offsets:
+
+    [ forward_offset, center_offset, backward_offset ]
+
+The minimum detected distance determines whether the fish needs to
+climb.
+
+If the fish is too close to terrain, an upward velocity correction is
+applied.
+
+------------------------------------------------------------------------
+
+## Velocity-Based Locomotion
+
+The fish position is updated using a velocity vector:
+
+    velocity = forward_direction * forward_speed
+
+Additional vertical adjustments are applied for:
+
+-   terrain avoidance
+-   target depth alignment
+-   obstacle avoidance
+
+The final position update:
+
+    obj.location += velocity
+
+------------------------------------------------------------------------
+
+## Procedural Skeletal Motion
+
+The swimming animation is generated procedurally by rotating the
+armature bones using a sinusoidal function.
+
+For each bone:
+
+    angle = amplitude * envelope * sin(phase)
+
+Where:
+
+-   **phase** creates a travelling wave along the body
+-   **envelope** increases motion amplitude toward the tail
+-   **wave length** controls spatial frequency
+
+This produces a biologically inspired **propagating wave motion**
+typical of fish locomotion.
+
+Because the animation is generated mathematically, it requires **no
+keyframe animation**.
 
 ------------------------------------------------------------------------
 
 ## Repository Structure
 
-procedural-fish-ai-blender/ │ ├── Cinematic_demo.blend ├──
-fish_ai.mp4 └── README.md
+    procedural-fish-ai-blender/
+    │
+    ├── Cinematic_demo.blend
+    ├── fish_ai.mp4
+    └── README.md
 
 ------------------------------------------------------------------------
 
 ## Author
-Developed by Spartan-X1.
+
+Developed by **Spartan‑X1**
