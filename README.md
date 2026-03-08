@@ -19,13 +19,15 @@ skeleton‑based procedural animation concepts**.
 
 ## Demo
 
-The repository includes a short demonstration showing:
+The repository includes a short demonstration(fish_ai.mp4) showing:
 
 -   Procedural swimming animation
 -   Autonomous navigation
 -   Terrain avoidance
 -   Predator fleeing behavior
 -   Target seeking behavior
+
+![Predator_AI Demo](Predator_escape.gif)
 
 ------------------------------------------------------------------------
 
