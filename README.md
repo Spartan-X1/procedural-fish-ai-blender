@@ -27,7 +27,11 @@ The repository includes a short demonstration(fish_ai.mp4) showing:
 -   Predator fleeing behavior
 -   Target seeking behavior
 
+The plant is designated as the predator :
 ![Predator_AI Demo](Predator_escape.gif)
+
+The UI panel usage : 
+![UI_Panal_uasage](States.gif)
 
 ------------------------------------------------------------------------
 
